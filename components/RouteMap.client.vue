@@ -1,152 +1,143 @@
 <template>
-  <div ref="mapContainer" class="map-container"></div>
+  <div ref="mapContainer" class="shadow-inner bg-slate-800 relative z-10 isolate" style="width: 100%; height: 100%; min-height: 400px;"></div>
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 const props = defineProps({
-  points: { type: Array, default: () => [] },
-  editable: { type: Boolean, default: false },
-  segments: { type: Array, default: () => [] }
+  points: {
+    type: Array,
+    default: () => []
+  },
+  segments: {
+    type: Array,
+    default: () => []
+  },
+  editable: {
+    type: Boolean,
+    default: false
+  }
 })
 
 const emit = defineEmits(['update:points', 'add-point'])
 
 const mapContainer = ref(null)
 let map = null
-let polylineLayer = null
-let segmentLayers = L.layerGroup()
-let markersLayer = L.layerGroup()
+let markers = []
+let polylines = []
 
+// Fix Leaflet icon issue in Nuxt/Webpack env
 const fixLeafletIcons = () => {
-    delete L.Icon.Default.prototype._getIconUrl
-    L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    })
+  delete L.Icon.Default.prototype._getIconUrl
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  })
 }
 
-onMounted(async () => {
-  await nextTick()
+onMounted(() => {
+  console.log('RouteMap mounted')
   if (!mapContainer.value) return
-  
+
   fixLeafletIcons()
   
-  // Create map
-  map = L.map(mapContainer.value, {
-      zoomControl: false,
-      attributionControl: false
-  }).setView([-2.5, 118], 5)
+  // Initialize Map
+  map = L.map(mapContainer.value).setView([-6.200000, 106.816666], 5)
 
-  // OpenStreetMap Standard (Terang)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
   }).addTo(map)
-  
-  L.control.zoom({ position: 'topright' }).addTo(map)
 
-  segmentLayers.addTo(map)
-  markersLayer.addTo(map)
-
+  // Click handler
   map.on('click', (e) => {
     if (props.editable) {
-       emit('add-point', { lat: e.latlng.lat, lng: e.latlng.lng })
+      emit('add-point', { lat: e.latlng.lat, lng: e.latlng.lng })
     }
   })
 
-  // Force resize trigger
-  setTimeout(() => { map.invalidateSize() }, 100)
-  setTimeout(() => { map.invalidateSize() }, 500)
+  // Force resize in case container size was not ready
+  setTimeout(() => {
+    map.invalidateSize()
+  }, 200)
 
-  drawRoute()
+  // Initial render
+  renderMarkers()
+  renderSegments()
 })
 
-onBeforeUnmount(() => {
-  if (map) {
-    map.remove()
-    map = null
-  }
-})
-
-watch(() => props.points, () => drawRoute(), { deep: true })
-watch(() => props.segments, () => drawRoute(), { deep: true })
-
-const drawRoute = () => {
-    if (!map) return
-
-    if (polylineLayer) map.removeLayer(polylineLayer)
-    segmentLayers.clearLayers()
-    markersLayer.clearLayers()
-
-    if (props.points.length === 0) return
-
-    const latlngs = props.points.map(p => [p.lat, p.lng])
-
-    if (props.editable || props.segments.length === 0) {
-        polylineLayer = L.polyline(latlngs, {
-            color: '#2563eb', // Blue-600
-            weight: 4,
-            opacity: 0.8,
-            dashArray: '10, 10'
-        }).addTo(map)
-    } else {
-        props.segments.forEach(seg => {
-            const color = seg.day === 1 ? '#2563eb' : (seg.day === 2 ? '#f59e0b' : '#64748b')
-            L.polyline(seg.path, {
-                color: color,
-                weight: 5,
-                opacity: 0.9
-            }).addTo(segmentLayers)
-        })
+onUnmounted(() => {
+    if (map) {
+        map.remove()
+        map = null
     }
+})
 
-    props.points.forEach((p, index) => {
-        const isStart = index === 0
-        const isEnd = index === props.points.length - 1
-        const fillColor = isStart ? '#10b981' : (isEnd ? '#ef4444' : '#fff')
-        
-        const circle = L.circleMarker([p.lat, p.lng], {
-            radius: 6,
-            fillColor: fillColor,
-            color: '#1e293b',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 1
-        })
-        markersLayer.addLayer(circle)
+// Watchers
+watch(() => props.points, () => {
+  renderMarkers()
+}, { deep: true })
+
+watch(() => props.segments, () => {
+  renderSegments()
+}, { deep: true })
+
+watch(() => props.editable, () => {
+  renderMarkers()
+})
+
+function renderMarkers() {
+  if (!map) return
+
+  // Clear existing markers
+  markers.forEach(m => map.removeLayer(m))
+  markers = []
+
+  props.points.forEach((p, index) => {
+    const marker = L.marker([p.lat, p.lng], {
+      draggable: props.editable
+    }).addTo(map)
+
+    marker.on('dragend', (e) => {
+      const newLatLng = e.target.getLatLng()
+      const newPoints = [...props.points]
+      newPoints[index] = { lat: newLatLng.lat, lng: newLatLng.lng }
+      emit('update:points', newPoints)
     })
     
-    if (latlngs.length > 0) {
-       setTimeout(() => {
-          const bounds = L.latLngBounds(latlngs)
-          if(bounds.isValid()) map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 })
-       }, 100)
-    }
+    // Right click to delete
+    marker.on('contextmenu', () => {
+        if (props.editable) {
+            const newPoints = [...props.points]
+            newPoints.splice(index, 1)
+            emit('update:points', newPoints)
+        }
+    })
+
+    markers.push(marker)
+  })
+}
+
+function renderSegments() {
+  if (!map) return
+
+  // Clear existing polylines
+  polylines.forEach(p => map.removeLayer(p))
+  polylines = []
+
+  props.segments.forEach(seg => {
+    const polyline = L.polyline(seg.coords, {
+      color: seg.color,
+      weight: 4,
+      opacity: 0.8
+    }).addTo(map)
+    polylines.push(polyline)
+  })
 }
 </script>
 
 <style scoped>
-/* Force styling to ensure map is visible */
-.map-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  background-color: #e2e8f0; /* slate-200 fallback */
-}
-</style>
-
-<style>
-/* Global overrides for Leaflet */
-.leaflet-container {
-    z-index: 0 !important;
-    background: #e2e8f0;
-}
 </style>

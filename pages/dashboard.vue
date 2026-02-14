@@ -1,183 +1,168 @@
 <template>
-  <div class="relative w-full h-screen bg-slate-900 overflow-hidden font-sans text-slate-800">
+  <div class="flex h-screen w-full bg-slate-900 text-slate-100">
     
-    <!-- 1. MAP LAYER (Background Full) -->
-    <div class="absolute inset-0 z-0">
-      <RouteMap 
-        v-model:points="points" 
-        :segments="segments" 
-        :editable="editable"
-        @add-point="addPoint"
-      />
-    </div>
-
-    <!-- 2. FLOATING SIDEBAR PANEL -->
-    <!-- Menggunakan transform translate alih-alih v-if untuk performa dan stabilitas visual lebih baik -->
+    <!-- Sidebar (Left Panel) -->
     <aside 
-      class="absolute top-4 left-4 bottom-4 w-80 md:w-[24rem] z-[1000] flex flex-col bg-white border-2 border-slate-900 rounded-2xl shadow-[8px_8px_0px_rgba(15,23,42,0.3)] overflow-hidden transition-transform duration-300 ease-in-out"
-      :class="sidebarOpen ? 'translate-x-0' : '-translate-x-[150%]'"
+      class="flex flex-col w-80 border-r border-slate-700 bg-slate-800 transition-all duration-300 ease-in-out"
+      :class="{ 'w-0 overflow-hidden': !sidebarOpen }"
     >
-      <!-- Header Panel -->
-      <div class="p-4 border-b-2 border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
-        <div>
-          <h1 class="text-xl font-black text-slate-900 tracking-tighter">R-Forecasts</h1>
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Route Planner</p>
-        </div>
-        <!-- Tombol Collapse -->
+      <!-- Header -->
+      <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+        <h2 class="text-xl font-bold text-white tracking-tight">R-Forecasts</h2>
+        
+        <!-- Collapse Button -->
         <button 
           @click="sidebarOpen = false"
-          class="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-700 bg-white border-2 border-slate-200 rounded-lg hover:border-slate-900 hover:bg-slate-900 hover:text-white transition-all shadow-sm active:translate-y-0.5"
+          class="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"
+          title="Collapse Sidebar"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-          Collapse
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+          </svg>
         </button>
       </div>
 
-      <!-- Form Content -->
-      <div class="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar bg-white">
-        
-        <!-- Box Input: Nama Kapal -->
-        <div class="space-y-1">
-           <div class="border-2 border-slate-200 rounded-xl overflow-hidden focus-within:border-slate-900 focus-within:ring-4 focus-within:ring-slate-100 transition-all">
-              <div class="bg-slate-50 text-[9px] font-bold text-center text-slate-500 uppercase py-1 border-b border-slate-200">
-                Masukkan Nama Kapal
+      <div class="p-4 flex-1 overflow-y-auto space-y-6 custom-scrollbar">
+        <!-- Editor Controls -->
+        <div class="space-y-4">
+          
+          <div class="space-y-3">
+            <div>
+              <label class="label text-xs uppercase font-bold text-slate-400">Masukkan Nama Kapal</label>
+              <input v-model="shipName" type="text" class="input bg-slate-900/50 border-slate-600 focus:border-primary" placeholder="Nama Kapal..."/>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+              <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                  <label class="label text-xs uppercase font-bold text-slate-400">Tanggal dan Waktu Berangkat</label>
+                </div>
+                <div class="flex gap-2">
+                  <input v-model="departureTime" type="datetime-local" class="input bg-slate-900/50 border-slate-600 w-full flex-1 min-w-0" />
+                  <select v-model="departureZone" class="select bg-slate-900/50 border-slate-600 focus:border-primary w-24 text-xs px-1 text-white" title="Time Zone">
+                      <option class="text-black" v-for="tz in timezones" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
+                  </select>
+                </div>
               </div>
-              <input 
-                v-model="shipName" 
-                type="text" 
-                class="w-full px-3 py-2.5 text-sm font-bold text-center text-slate-800 focus:outline-none placeholder:text-slate-300 placeholder:font-medium"
-                placeholder="Contoh: MV. Baruna Jaya"
-                :disabled="!editable"
-              />
-           </div>
-        </div>
 
-        <!-- Box Input: Berangkat -->
-        <div class="flex gap-2">
-           <div class="flex-1 border-2 border-slate-200 rounded-xl overflow-hidden focus-within:border-slate-900 transition-all relative">
-              <label class="absolute top-1 left-2 text-[8px] font-bold text-slate-400 uppercase tracking-wider">Waktu Berangkat</label>
-              <input 
-                v-model="departureTime" 
-                type="datetime-local" 
-                class="w-full px-2 py-2 pt-5 text-xs font-bold text-slate-800 text-center focus:outline-none bg-transparent"
-                :disabled="!editable"
-              />
-           </div>
-           <div class="w-20 border-2 border-slate-200 rounded-xl overflow-hidden bg-slate-50 flex flex-col justify-center shrink-0">
-              <span class="text-[8px] font-black text-slate-400 text-center uppercase pt-1">Zone</span>
-              <select v-model="departureZone" class="w-full bg-transparent text-center text-xs font-bold text-slate-700 focus:outline-none appearance-none pb-1 cursor-pointer" :disabled="!editable">
-                  <option v-for="tz in timezones" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
-              </select>
-           </div>
-        </div>
+               <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                  <label class="label text-xs uppercase font-bold text-slate-400">Tanggal dan Waktu Tiba</label>
+                </div>
+                <div class="flex gap-2">
+                    <input v-model="arrivalTime" type="datetime-local" class="input bg-slate-900/50 border-slate-600 w-full flex-1 min-w-0" />
+                    <select v-model="arrivalZone" class="select bg-slate-900/50 border-slate-600 focus:border-primary w-24 text-xs px-1 text-white" title="Time Zone">
+                        <option class="text-black bg-white" v-for="tz in timezones" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
+                    </select>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <!-- Box Input: Tiba -->
-        <div class="flex gap-2">
-           <div class="flex-1 border-2 border-slate-200 rounded-xl overflow-hidden focus-within:border-slate-900 transition-all relative">
-              <label class="absolute top-1 left-2 text-[8px] font-bold text-slate-400 uppercase tracking-wider">Waktu Tiba</label>
-              <input 
-                v-model="arrivalTime" 
-                type="datetime-local" 
-                class="w-full px-2 py-2 pt-5 text-xs font-bold text-slate-800 text-center focus:outline-none bg-transparent"
-                :disabled="!editable"
-              />
+          <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 grid grid-cols-2 gap-4">
+             <div>
+               <span class="block text-xs text-slate-500 mb-1 uppercase">Avg Speed</span>
+               <span class="block text-lg font-mono font-bold text-accent">{{ formattedSpeed }} <span class="text-xs font-normal text-slate-500">kts</span></span>
+             </div>
+             <div>
+                <span class="block text-xs text-slate-500 mb-1 uppercase">Total Distance</span>
+                <span class="block text-lg font-mono font-bold text-white">{{ totalDistance.toFixed(0) }} <span class="text-xs font-normal text-slate-500">km</span></span>
+             </div>
            </div>
-           <div class="w-20 border-2 border-slate-200 rounded-xl overflow-hidden bg-slate-50 flex flex-col justify-center shrink-0">
-              <span class="text-[8px] font-black text-slate-400 text-center uppercase pt-1">Zone</span>
-              <select v-model="arrivalZone" class="w-full bg-transparent text-center text-xs font-bold text-slate-700 focus:outline-none appearance-none pb-1 cursor-pointer" :disabled="!editable">
-                  <option v-for="tz in timezones" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
-              </select>
-           </div>
-        </div>
 
-        <!-- Info Box -->
-        <div class="grid grid-cols-2 gap-3">
-           <div class="bg-white border-2 border-slate-100 rounded-xl p-3 text-center shadow-sm">
-              <div class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Jarak Total</div>
-              <div class="text-base font-black text-slate-800 mt-1">{{ totalDistance.toFixed(0) }} <span class="text-[10px] font-bold text-slate-400">km</span></div>
-           </div>
-           <div class="bg-white border-2 border-slate-100 rounded-xl p-3 text-center shadow-sm">
-              <div class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Est. Kecepatan</div>
-              <div class="text-base font-black text-blue-600 mt-1">{{ formattedSpeed }} <span class="text-[10px] font-bold text-blue-300">kn</span></div>
-           </div>
+          <div class="pt-4 space-y-3">
+             <button 
+               @click="saveRoute" 
+               class="btn w-full justify-center border border-slate-600 bg-slate-700 hover:bg-slate-600 text-white font-bold uppercase tracking-wider py-3"
+               :disabled="saving || points.length < 2"
+             >
+               {{ saving ? 'Menyimpan...' : 'SIMPAN RUTE' }}
+             </button>
+             
+             <button 
+               @click="resetRoute" 
+               class="btn w-full justify-center border border-slate-600 hover:bg-slate-800 text-slate-400 uppercase tracking-wider"
+             >
+               Reset
+             </button>
+          </div>
         </div>
         
-        <!-- Waypoints List (Mini) -->
-        <div class="bg-slate-50 border-2 border-slate-200 rounded-xl overflow-hidden">
-           <div class="px-3 py-2 border-b border-slate-200 flex justify-between items-center bg-slate-100/50">
-              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Waypoints</span>
-              <span class="text-[10px] font-black bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-600">{{ points.length }}</span>
-           </div>
-           <div class="max-h-24 overflow-y-auto custom-scrollbar p-1">
-              <div v-if="points.length === 0" class="text-center py-3 text-xs text-slate-400 italic font-medium">
-                 Klik di peta untuk menambahkan titik
-              </div>
-              <div v-else class="space-y-1">
-                 <div v-for="(p, i) in points" :key="i" class="flex justify-between items-center text-[10px] font-mono px-2 py-1.5 bg-white border border-slate-100 rounded hover:border-slate-300 transition-colors group">
-                    <span class="text-slate-600 font-bold"><span class="text-slate-400 mr-1">{{ i+1 }}.</span> {{ p.lat.toFixed(3) }}, {{ p.lng.toFixed(3) }}</span>
-                    <button v-if="editable" @click="removePoint(i)" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-all">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                 </div>
-              </div>
-           </div>
+        <div class="border-t border-slate-700/50 pt-4">
+             <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Saved Routes</h3>
+             </div>
+             
+             <div class="space-y-2">
+               <!-- Route Selector Dropdown -->
+               <select 
+                 v-model="selectedRouteId" 
+                 @change="onRouteSelect"
+                 class="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white text-sm focus:border-primary focus:outline-none transition-colors"
+               >
+                 <option value="">Pilih Rute...</option>
+                 <option 
+                   v-for="r in savedRoutes" 
+                   :key="r.properties.id" 
+                   :value="r.properties.id"
+                 >
+                   {{ r.properties.name || 'Untitled Route' }}
+                 </option>
+               </select>
+               
+               <!-- Delete Button -->
+               <button 
+                 v-if="selectedRouteId"
+                 @click="deleteRoute"
+                 class="w-full px-3 py-2 bg-red-900/30 border border-red-700/50 rounded-lg text-red-400 text-sm font-medium hover:bg-red-900/50 hover:border-red-600 transition-colors flex items-center justify-center gap-2"
+               >
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                   <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                 </svg>
+                 Hapus Rute
+               </button>
+             </div>
         </div>
-
-        <!-- Saved Route Loader -->
-        <div class="pt-2">
-           <label class="text-[9px] font-bold text-slate-400 uppercase mb-1.5 block tracking-wider">Saved Routes</label>
-           <div class="flex gap-2">
-              <div class="relative flex-1">
-                 <select v-model="selectedRouteId" @change="onRouteSelect" class="w-full bg-white border-2 border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 focus:border-slate-900 outline-none appearance-none cursor-pointer">
-                    <option value="new" class="text-blue-600">+ Buat Rute Baru</option>
-                    <option disabled>──────────</option>
-                    <option v-for="r in savedRoutes" :key="r.id" :value="r.id">{{ r.properties.name }}</option>
-                 </select>
-                 <div class="absolute right-2 top-2.5 pointer-events-none text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                 </div>
-              </div>
-              <button v-if="selectedRouteId && selectedRouteId !== 'new'" @click="deleteRoute" class="px-3 bg-red-50 border-2 border-red-100 rounded-xl text-red-400 hover:bg-red-500 hover:border-red-500 hover:text-white transition-all shadow-sm">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-              </button>
-           </div>
-        </div>
-
-      </div>
-
-      <!-- Footer Buttons -->
-      <div class="p-5 bg-slate-50 border-t-2 border-slate-100 space-y-3 shrink-0">
-        <button 
-          @click="saveRoute" 
-          :disabled="!editable || saving || points.length < 2"
-          class="w-full py-3.5 bg-slate-900 text-white font-black rounded-xl shadow-[4px_4px_0px_rgba(148,163,184,1)] active:shadow-none active:translate-y-[4px] hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs border-2 border-slate-900"
-        >
-          {{ saving ? 'Menyimpan...' : 'SIMPAN RUTE' }}
-        </button>
-        
-        <button 
-          @click="resetRoute" 
-          class="w-full py-2.5 bg-white border-2 border-slate-200 text-slate-400 font-bold rounded-xl hover:border-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest text-[10px]"
-        >
-          Reset
-        </button>
       </div>
     </aside>
 
-    <!-- 3. TOMBOL BUKA (Floating Icon) -->
-    <!-- Z-Index 1001 agar pasti di atas segalanya -->
-    <button 
-      @click="sidebarOpen = true"
-      class="absolute top-6 left-6 z-[1001] p-3 bg-white border-2 border-slate-900 text-slate-900 rounded-xl shadow-[4px_4px_0px_rgba(15,23,42,0.2)] hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px] transition-all group active:scale-95"
-      :class="sidebarOpen ? '-translate-x-[200%] opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'"
-      title="Buka Panel"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-90 transition-transform"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
-    </button>
-    
-    <!-- 4. PETA LABEL (Optional) -->
-    <div v-if="!sidebarOpen" class="absolute top-6 left-20 z-20 pointer-events-none">
-       <h1 class="text-xl font-black text-slate-900/50 uppercase tracking-widest drop-shadow-sm select-none bg-white/50 backdrop-blur px-4 py-2 rounded-xl border border-white/20">Mode Peta Penuh</h1>
+    <!-- Map Container (Right Side) -->
+    <div class="flex-1 relative" style="flex: 1 1 0%; min-width: 0;">
+      <!-- Expand Button (Visible only when sidebar is closed) -->
+      <button 
+        v-if="!sidebarOpen"
+        @click="sidebarOpen = true"
+        class="absolute top-4 left-4 z-10 p-2 bg-slate-800 border border-slate-700 rounded-lg text-white shadow-md hover:bg-slate-700 transition-colors"
+        title="Expand Sidebar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+      </button>
+
+      <!-- Map -->
+      <div class="absolute inset-0">
+        <ClientOnly>
+          <RouteMap 
+            v-model:points="points" 
+            :segments="segments" 
+            :editable="editable"
+            @add-point="addPoint"
+          />
+        </ClientOnly>
+      </div>
+
+      <!-- Map Info Overlay -->
+      <div class="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
+        <!-- Legend -->
+        <div class="bg-slate-800/90 backdrop-blur p-3 rounded-lg shadow-xl border border-slate-700 pointer-events-none">
+          <div class="text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-wider">Visual Forecast</div>
+          <div class="flex gap-4 text-xs font-medium">
+              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#0ea5e9] shadow-[0_0_8px_rgba(14,165,233,0.5)]"></span> Day 1</div>
+              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#f59e0b] shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span> Day 2</div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -186,25 +171,24 @@
 <script setup>
 import { formatSpeed, calculateSpeedVal, splitRouteByMidnight, calculateDistance } from '~/utils/routeMath'
 
-// --- State ---
+const { logout } = useAuth()
+
+// State
 const sidebarOpen = ref(true)
-const loading = ref(false)
-const saving = ref(false)
-const editable = ref(true)
-
-// Data
 const savedRoutes = ref([])
-const selectedRouteId = ref('new')
 const currentRouteId = ref(null)
-
-// Form
+const selectedRouteId = ref('')
 const shipName = ref('')
 const departureTime = ref('')
 const arrivalTime = ref('')
+const points = ref([])
+const editable = ref(false)
+const saving = ref(false)
 const departureZone = ref('UTC')
 const arrivalZone = ref('UTC')
-const points = ref([])
 
+// Timezone options
+// Timezone options
 const timezones = [
   { value: 'UTC', label: 'UTC' },
   { value: 'Asia/Jakarta', label: 'WIB' },
@@ -212,18 +196,42 @@ const timezones = [
   { value: 'Asia/Jayapura', label: 'WIT' },
   { value: 'Asia/Singapore', label: 'SGT' },
   { value: 'Asia/Tokyo', label: 'JST' },
+  { value: 'Europe/London', label: 'BST/GMT' },
+  { value: 'America/New_York', label: 'EST/EDT' },
 ]
 
-// --- Computed ---
-const formattedSpeed = computed(() => {
-    const val = calculateSpeedVal(
+// Init defaults for dates
+const initDates = () => {
+    // Basic init; ideal world uses timezone aware "now"
+    const now = new Date()
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
+    departureTime.value = now.toISOString().slice(0, 16)
+    
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    arrivalTime.value = tomorrow.toISOString().slice(0, 16)
+}
+
+// Computed
+const segments = computed(() => {
+    return splitRouteByMidnight(
         points.value.map(p => [p.lat, p.lng]), 
         departureTime.value, 
         arrivalTime.value, 
-        departureZone.value, 
+        departureZone.value,
         arrivalZone.value
     )
-    return formatSpeed(val)
+})
+
+const formattedSpeed = computed(() => {
+    const speed = calculateSpeedVal(
+        points.value.map(p => [p.lat, p.lng]), 
+        departureTime.value, 
+        arrivalTime.value,
+        departureZone.value,
+        arrivalZone.value
+    )
+    return formatSpeed(speed)
 })
 
 const totalDistance = computed(() => {
@@ -235,29 +243,7 @@ const totalDistance = computed(() => {
     return d
 })
 
-const segments = computed(() => {
-    return splitRouteByMidnight(
-        points.value.map(p => [p.lat, p.lng]), 
-        departureTime.value, 
-        arrivalTime.value, 
-        departureZone.value, 
-        arrivalZone.value
-    )
-})
-
-// --- Methods ---
-const initDates = () => {
-    const now = new Date()
-    const toLocalISO = (d) => {
-        const offset = d.getTimezoneOffset() * 60000
-        return new Date(d.getTime() - offset).toISOString().slice(0, 16)
-    }
-    departureTime.value = toLocalISO(now)
-    const tomorrow = new Date(now)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    arrivalTime.value = toLocalISO(tomorrow)
-}
-
+// Methods
 const fetchRoutes = async () => {
     const { data } = await useFetch('/api/routes')
     if (data.value) {
@@ -265,41 +251,33 @@ const fetchRoutes = async () => {
     }
 }
 
-const resetRoute = () => {
-    shipName.value = ''
-    points.value = []
+const createNewRoute = () => {
     currentRouteId.value = null
-    selectedRouteId.value = 'new'
+    resetRoute()
+}
+
+const resetRoute = () => {
+    points.value = []
+    shipName.value = ''
+    departureZone.value = 'UTC'
+    arrivalZone.value = 'UTC'
     initDates()
     editable.value = true
 }
 
-const addPoint = (latlng) => {
-    if(editable.value) points.value.push(latlng)
-}
-
-const removePoint = (index) => {
-    points.value.splice(index, 1)
-}
-
-const onRouteSelect = () => {
-    if (selectedRouteId.value === 'new') {
-        resetRoute()
-        return
-    }
-    const route = savedRoutes.value.find(r => r.id === selectedRouteId.value)
-    if (route) {
-        loadRoute(route)
-    }
-}
-
 const loadRoute = (route) => {
-    currentRouteId.value = route.id
+    currentRouteId.value = route.properties.id
     shipName.value = route.properties.name
     departureTime.value = route.properties.departureTime || ''
     arrivalTime.value = route.properties.arrivalTime || ''
     departureZone.value = route.properties.departureZone || 'UTC'
     arrivalZone.value = route.properties.arrivalZone || 'UTC'
+    
+    // Legacy support for single timezone field
+    if (route.properties.timezone) {
+        departureZone.value = route.properties.timezone
+        arrivalZone.value = route.properties.timezone
+    }
     
     if (route.geometry && route.geometry.coordinates) {
         points.value = route.geometry.coordinates.map(c => ({ lat: c[1], lng: c[0] }))
@@ -309,26 +287,7 @@ const loadRoute = (route) => {
     editable.value = false
 }
 
-const deleteRoute = async () => {
-    if (!selectedRouteId.value || selectedRouteId.value === 'new') return
-    if (!confirm('Hapus rute ini secara permanen?')) return
-    try {
-        await useFetch(`/api/routes/${selectedRouteId.value}`, {
-            method: 'DELETE'
-        })
-        await fetchRoutes()
-        selectedRouteId.value = 'new'
-        resetRoute()
-    } catch(e) {
-        alert('Gagal menghapus rute')
-    }
-}
-
 const saveRoute = async () => {
-    if (!shipName.value) {
-        alert('Mohon isi nama kapal.')
-        return
-    }
     saving.value = true
     try {
         const geoJson = {
@@ -339,46 +298,74 @@ const saveRoute = async () => {
                  arrivalTime: arrivalTime.value,
                  departureZone: departureZone.value,
                  arrivalZone: arrivalZone.value,
-                 speedKnots: formattedSpeed.value,
-                 totalDistanceKm: totalDistance.value
+                 speedKnots: formattedSpeed.value
             },
             geometry: {
                 type: 'LineString',
                 coordinates: points.value.map(p => [p.lng, p.lat])
             }
         }
-        const { error } = await useFetch('/api/routes', {
+
+        const { data, error } = await useFetch('/api/routes', {
             method: 'POST',
             body: geoJson
         })
-        if (error.value) throw error.value
-        await fetchRoutes()
-        alert('Rute berhasil disimpan!')
-    } catch(e) {
-        alert('Gagal menyimpan rute.')
+        
+        if (!error.value) {
+            await fetchRoutes()
+            currentRouteId.value = data.value.id
+        }
     } finally {
         saving.value = false
+    }
+}
+
+const addPoint = (latlng) => {
+    points.value.push(latlng)
+}
+
+const onRouteSelect = () => {
+    if (!selectedRouteId.value) {
+        resetRoute()
+        currentRouteId.value = null
+        return
+    }
+    
+    const route = savedRoutes.value.find(r => r.properties.id === selectedRouteId.value)
+    if (route) {
+        loadRoute(route)
+    }
+}
+
+const deleteRoute = async () => {
+    if (!selectedRouteId.value) return
+    
+    if (!confirm('Apakah Anda yakin ingin menghapus rute ini?')) {
+        return
+    }
+    
+    try {
+        const { error } = await useFetch(`/api/routes/${selectedRouteId.value}`, {
+            method: 'DELETE'
+        })
+        
+        if (!error.value) {
+            await fetchRoutes()
+            selectedRouteId.value = ''
+            if (currentRouteId.value === selectedRouteId.value) {
+                resetRoute()
+                currentRouteId.value = null
+            }
+        }
+    } catch (err) {
+        console.error('Failed to delete route:', err)
+        alert('Gagal menghapus rute')
     }
 }
 
 onMounted(() => {
     fetchRoutes()
     initDates()
+    editable.value = true // Start in edit mode for empty state
 })
 </script>
-
-<style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent; 
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1; 
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8; 
-}
-</style>
