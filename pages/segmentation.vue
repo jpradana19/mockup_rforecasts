@@ -26,6 +26,19 @@
             
             <!-- LEFT: Title & Route Selector -->
             <div class="flex items-center gap-4 shrink-0 h-full">
+                <!-- Back Button -->
+                <!-- Back Button (Redesigned) -->
+                <button 
+                  @click="navigateTo('/dashboard')" 
+                  class="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-md text-slate-300 hover:text-white transition-colors group mr-2 border border-slate-600"
+                  title="Kembali ke Dashboard"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    <span class="text-xs font-bold uppercase tracking-wide">Dashboard</span>
+                </button>
+
                 <!-- Title Block: MENGGUNAKAN DIV/SPAN BUKAN H1/H2 untuk menghindari konflik main.css -->
                 <div class="flex flex-col justify-center leading-none">
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Segmentasi</span>

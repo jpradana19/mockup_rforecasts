@@ -143,12 +143,33 @@
                </button>
 
                <button 
+                 @click="undoLastPoint" 
+                 class="btn w-full justify-center border border-slate-600 hover:bg-slate-800 text-slate-400 uppercase tracking-wider py-3"
+                 :disabled="points.length === 0"
+               >
+                 Undo Last
+               </button>
+
+               <button 
                  @click="saveRoute" 
-                 class="btn w-full justify-center border border-slate-600 bg-slate-700 hover:bg-slate-600 text-white font-bold uppercase tracking-wider py-3"
+                 class="btn w-full justify-center border border-slate-600 bg-slate-700 hover:bg-slate-600 text-white font-bold uppercase tracking-wider py-3 col-span-2"
                  :disabled="saving || points.length < 2"
                >
                  {{ saving ? 'Wait...' : 'SIMPAN RUTE' }}
                </button>
+
+               <button 
+                 @click="deleteRoute" 
+                 class="btn w-full justify-center border border-red-900/30 hover:bg-red-900/50 text-red-500 uppercase tracking-wider py-3 col-span-2"
+                 :disabled="!currentRouteId"
+                 v-if="currentRouteId"
+               >
+                 Hapus Rute
+               </button>
+            </div>
+
+            <div class="text-xs text-slate-500 text-center mt-2">
+                Tip: Klik kanan pada marker untuk menghapus titik tertentu.
             </div>
           </div>
 
@@ -285,7 +306,7 @@ const loadRoute = (route) => {
         points.value = route.geometry.coordinates.map(c => ({ lat: c[1], lng: c[0] }))
     }
     
-    editable.value = false
+    editable.value = true
 }
 
 const saveRoute = async () => {
@@ -307,15 +328,34 @@ const saveRoute = async () => {
             }
         }
 
-        const { data, error } = await useFetch('/api/routes', {
-            method: 'POST',
-            body: geoJson
-        })
+        let result;
         
-        if (!error.value) {
-            await fetchRoutes()
-            currentRouteId.value = data.value.id
+        if (currentRouteId.value) {
+            // Update existing
+            const { data, error } = await useFetch(`/api/routes/${currentRouteId.value}`, {
+                method: 'PUT',
+                body: geoJson
+            })
+            result = { data, error }
+        } else {
+            // Create new
+            const { data, error } = await useFetch('/api/routes', {
+                method: 'POST',
+                body: geoJson
+            })
+            result = { data, error }
         }
+
+        if (!result.error.value) {
+            await fetchRoutes()
+             if (result.data.value && result.data.value.id) {
+                currentRouteId.value = result.data.value.id
+            }
+            alert('Rute berhasil disimpan!')
+        }
+    } catch (e) {
+        console.error(e)
+        alert('Gagal menyimpan rute')
     } finally {
         saving.value = false
     }
@@ -323,6 +363,12 @@ const saveRoute = async () => {
 
 const addPoint = (latlng) => {
     points.value.push(latlng)
+}
+
+const undoLastPoint = () => {
+    if (points.value.length > 0) {
+        points.value.pop()
+    }
 }
 
 const onRouteSelect = () => {

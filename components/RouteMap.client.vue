@@ -26,6 +26,7 @@ const emit = defineEmits(['update:points', 'add-point'])
 const mapContainer = ref(null)
 let map = null
 let markers = []
+let midpointMarkers = []
 let polylines = []
 
 // Fix Leaflet icon issue in Nuxt/Webpack env
@@ -87,7 +88,9 @@ watch(() => props.segments, () => {
 
 watch(() => props.editable, () => {
   renderMarkers()
+  // renderMidpoints is called inside renderMarkers
 })
+
 
 function renderMarkers() {
   if (!map) return
@@ -117,8 +120,73 @@ function renderMarkers() {
         }
     })
 
+    // Click to show delete popup
+    if (props.editable) {
+        const popupContent = document.createElement('div')
+        popupContent.className = 'p-1'
+        
+        const btn = document.createElement('button')
+        btn.innerText = 'Hapus Titik'
+        btn.className = 'text-xs text-red-500 font-bold hover:underline'
+        btn.onclick = () => {
+            const newPoints = [...props.points]
+            newPoints.splice(index, 1)
+            emit('update:points', newPoints)
+            map.closePopup()
+        }
+        
+        popupContent.appendChild(btn)
+        marker.bindPopup(popupContent)
+    }
+
     markers.push(marker)
   })
+  
+  renderMidpoints()
+}
+
+function renderMidpoints() {
+  if (!map || !props.editable) return
+
+  // Clear existing midpoint markers
+  midpointMarkers.forEach(m => map.removeLayer(m))
+  midpointMarkers = []
+
+  if (props.points.length < 2) return
+
+  for (let i = 0; i < props.points.length - 1; i++) {
+      const p1 = props.points[i]
+      const p2 = props.points[i+1]
+      
+      const midLat = (p1.lat + p2.lat) / 2
+      const midLng = (p1.lng + p2.lng) / 2
+      
+      const marker = L.circleMarker([midLat, midLng], {
+          radius: 5,
+          color: '#3b82f6', // blue-500
+          fillColor: '#3b82f6',
+          fillOpacity: 0.5,
+          opacity: 0.5,
+          weight: 1
+      }).addTo(map)
+      
+      marker.on('mouseover', () => {
+          marker.setStyle({ radius: 8, fillOpacity: 0.8, opacity: 0.8 })
+      })
+      
+      marker.on('mouseout', () => {
+          marker.setStyle({ radius: 5, fillOpacity: 0.5, opacity: 0.5 })
+      })
+      
+      marker.on('click', (e) => {
+          L.DomEvent.stopPropagation(e)
+          const newPoints = [...props.points]
+          newPoints.splice(i + 1, 0, { lat: midLat, lng: midLng })
+          emit('update:points', newPoints)
+      })
+      
+      midpointMarkers.push(marker)
+  }
 }
 
 function renderSegments() {
