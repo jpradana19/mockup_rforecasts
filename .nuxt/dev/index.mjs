@@ -2558,6 +2558,7 @@ async function getIslandContext(event) {
 const _lazy_zAOywy = () => Promise.resolve().then(function () { return auth_post$1; });
 const _lazy_7kuGl6 = () => Promise.resolve().then(function () { return routes$1; });
 const _lazy_N0gZzB = () => Promise.resolve().then(function () { return _id__delete$1; });
+const _lazy_nU_Mg7 = () => Promise.resolve().then(function () { return _id__put$1; });
 const _lazy_lote_4 = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
@@ -2565,6 +2566,7 @@ const handlers = [
   { route: '/api/auth', handler: _lazy_zAOywy, lazy: true, middleware: false, method: "post" },
   { route: '/api/routes', handler: _lazy_7kuGl6, lazy: true, middleware: false, method: undefined },
   { route: '/api/routes/:id', handler: _lazy_N0gZzB, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/routes/:id', handler: _lazy_nU_Mg7, lazy: true, middleware: false, method: "put" },
   { route: '/__nuxt_error', handler: _lazy_lote_4, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_lote_4, lazy: true, middleware: false, method: undefined }
@@ -3019,6 +3021,36 @@ const _id__delete = defineEventHandler(async (event) => {
 const _id__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: _id__delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _id__put = defineEventHandler(async (event) => {
+  const id = event.context.params.id;
+  const dataDir = path.resolve(process.cwd(), "server/data/routes");
+  const filePath = path.join(dataDir, `${id}.geojson`);
+  try {
+    await promises.access(filePath);
+  } catch {
+    throw createError({ statusCode: 404, statusMessage: "Route not found" });
+  }
+  const body = await readBody(event);
+  if (!body.type || body.type !== "FeatureCollection" && body.type !== "Feature") {
+    throw createError({ statusCode: 400, statusMessage: "Invalid GeoJSON" });
+  }
+  if (body.properties) {
+    body.properties.id = id;
+    body.properties.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+  } else if (body.type === "FeatureCollection") {
+    if (!body.properties) body.properties = {};
+    body.properties.id = id;
+    body.properties.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+  }
+  await promises.writeFile(filePath, JSON.stringify(body, null, 2));
+  return { success: true, id };
+});
+
+const _id__put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__put
 }, Symbol.toStringTag, { value: 'Module' }));
 
 function renderPayloadResponse(ssrContext) {

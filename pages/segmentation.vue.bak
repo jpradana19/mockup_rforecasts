@@ -1,0 +1,291 @@
+<template>
+  <div class="flex flex-col h-screen w-full bg-slate-900 text-slate-100">
+    
+    <!-- Top Panel: Map -->
+    <div class="flex-1 relative w-full h-[85vh] min-h-[500px]">
+      <div class="absolute inset-0">
+         <ClientOnly>
+             <SegmentationMap 
+                :segments="segments"
+                :route-id="selectedRouteId"
+                @split="handleSplit"
+                @shift-boundary="handleShiftBoundary"
+                class="w-full h-full"
+             />
+         </ClientOnly>
+      </div>
+    </div>
+
+    <!-- Bottom Panel: Controls -->
+    <!-- Reduced height and compact layout -->
+    <aside class="flex flex-col w-full bg-slate-800 border-t border-slate-700 h-[15vh] min-h-[180px]">
+      <div class="px-4 py-2 border-b border-slate-700 flex justify-center items-center bg-slate-800 shrink-0">
+        <h2 class="text-sm font-bold text-white tracking-tight uppercase">SEGMENTASI RUTE</h2>
+      </div>
+
+      <div class="p-3 flex-1 overflow-y-auto custom-scrollbar">
+         <div class="max-w-7xl mx-auto w-full h-full flex flex-col justify-center">
+            
+            <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 h-full items-center">
+                <!-- LEFT COLUMN -->
+                <div class="flex flex-col gap-2 h-full justify-center">
+                    
+                    <div class="flex items-center gap-4">
+                        <!-- Route Selection -->
+                        <div class="flex-1">
+                             <label class="label text-xs font-bold text-slate-400 mb-1 block">Pilih Rute Kapal:</label>
+                             <select 
+                               v-model="selectedRouteId" 
+                               @change="loadRoute"
+                               class="w-full px-3 py-1.5 bg-slate-900/50 border border-slate-600 rounded text-white text-sm focus:border-primary focus:outline-none transition-colors"
+                             >
+                               <option value="">Pilih rute...</option>
+                               <option v-for="r in routes" :key="r.properties.id" :value="r.properties.id">
+                                 {{ r.properties.name || 'Untitled' }} ({{ new Date(r.properties.createdAt).toLocaleDateString() }})
+                               </option>
+                             </select>
+                        </div>
+    
+                        <!-- Total Segments -->
+                        <div class="shrink-0 flex flex-col items-center px-4 border-l border-slate-700">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Total Segment</span>
+                            <span class="text-xl font-mono font-bold text-white leading-none">{{ segments.length > 0 ? segments.length : '-' }}</span>
+                        </div>
+                    </div>
+
+                     <!-- Instructions (Compact Horizontal) -->
+                    <div class="flex items-center gap-2 text-[10px] text-slate-500 bg-slate-900/30 px-3 py-1.5 rounded border border-slate-700/50">
+                        <span class="font-bold text-slate-400 shrink-0">INFO:</span>
+                        <div class="flex gap-4 overflow-hidden truncate">
+                             <span>• Pilih rute</span>
+                             <span>• Klik lingkaran putih (Split)</span>
+                             <span>• Geser marker warna (Geser Batas)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="flex items-center gap-3 h-full">
+                    <!-- Action Buttons -->
+                    <div class="flex-1 grid grid-cols-2 gap-2">
+                        <button 
+                          @click="saveSegmentation" 
+                          class="btn py-2 bg-white hover:bg-slate-200 text-slate-900 font-bold text-xs uppercase tracking-wider rounded transition-colors border border-white"
+                          :disabled="!selectedRouteId || saving"
+                        >
+                          {{ saving ? '...' : 'SIMPAN' }}
+                        </button>
+
+                         <button 
+                             @click="resetSegments" 
+                             class="btn py-2 bg-transparent hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider rounded transition-colors border border-white"
+                             :disabled="!selectedRouteId"
+                         >
+                             RESET
+                         </button>
+                    </div>
+
+                    <!-- Next Button -->
+                    <NuxtLink to="/dashboard" class="btn px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs uppercase tracking-wider rounded transition-colors border border-slate-600 flex items-center gap-2 shrink-0 h-full max-h-[34px]">
+                        NEXT
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                    </NuxtLink>
+                </div>
+            </div>
+
+         </div>
+      </div>
+    </aside>
+
+  </div>
+</template>
+
+<script setup>
+// Map logic moved to SegmentationMap.client.vue to avoid SSR issues
+
+const routes = ref([])
+const selectedRouteId = ref('')
+const currentRoute = ref(null)
+const saving = ref(false)
+
+// We store segments as arrays of points {lat, lng}
+const segments = ref([])
+
+// Colors for segments (duplicated here for Overlay Info)
+const segmentColors = [
+  '#3b82f6', // blue-500
+  '#ef4444', // red-500
+  '#10b981', // green-500
+  '#f59e0b', // amber-500
+  '#8b5cf6', // violet-500
+  '#ec4899', // pink-500
+  '#06b6d4', // cyan-500
+]
+
+const getSegmentColor = (idx) => segmentColors[idx % segmentColors.length]
+const getSegmentName = (idx) => String.fromCharCode(65 + idx) // A, B, C...
+
+// Fetch routes list
+const fetchRoutes = async () => {
+    const { data } = await useFetch('/api/routes')
+    if (data.value) {
+        routes.value = data.value
+    }
+}
+
+// Load selected route
+const loadRoute = () => {
+    if (!selectedRouteId.value) {
+        segments.value = []
+        return
+    }
+
+    const route = routes.value.find(r => r.properties.id === selectedRouteId.value)
+    if (!route) return
+
+    currentRoute.value = route
+
+    // Parse route into segments
+    segments.value = []
+    
+    if (route.type === 'FeatureCollection') {
+        // Already segmented?
+        route.features.forEach(f => {
+            if (f.geometry && f.geometry.coordinates) {
+                 segments.value.push(f.geometry.coordinates.map(c => ({ lat: c[1], lng: c[0] })))
+            }
+        })
+    } else if (route.geometry && route.geometry.coordinates) {
+        // Single Feature
+        segments.value.push(route.geometry.coordinates.map(c => ({ lat: c[1], lng: c[0] })))
+    } else {
+        segments.value = []
+    }
+}
+
+const resetSegments = () => {
+    if (!currentRoute.value) return
+    // Flatten everything back to one segment
+    const allPoints = segments.value.flat()
+    segments.value = [allPoints]
+}
+
+// Split logic
+const handleSplit = ({ segmentIndex, pointIndex }) => {
+    // segmentIndex: which segment we are splitting (e.g. A)
+    // pointIndex: the index IN THAT SEGMENT where we want to split
+    // Splitting at index P means points 0..P becomes new Seg A, P..End becomes new Seg B
+
+    const originalSegment = segments.value[segmentIndex]
+    
+    // Safety check
+    if (!originalSegment || pointIndex <= 0 || pointIndex >= originalSegment.length - 1) return
+    
+    const newSeg1 = originalSegment.slice(0, pointIndex + 1) // Include the split point in first seg
+    const newSeg2 = originalSegment.slice(pointIndex) // Start from split point for second seg (continuity)
+
+    // Replace old segment with two new ones
+    segments.value.splice(segmentIndex, 1, newSeg1, newSeg2)
+}
+
+const handleShiftBoundary = ({ segmentIndex, newLatLng }) => {
+    // segmentIndex is the index of the segment whose START is being moved.
+    // This affects segments[segmentIndex-1] (end changed) and segments[segmentIndex] (start changed).
+    
+    if (segmentIndex <= 0 || segmentIndex >= segments.value.length) return
+
+    const prevSeg = segments.value[segmentIndex - 1]
+    const currSeg = segments.value[segmentIndex]
+
+    // Combine them. Note: prevSeg[last] should be same as currSeg[0].
+    // We remove duplicates to have a clean line to search.
+    const combined = [...prevSeg]
+    // If adjacent, combined[combined.length-1] === currSeg[0].
+    // Let's verify or just slice to be safe.
+    if (currSeg.length > 0) {
+        combined.push(...currSeg.slice(1))
+    }
+
+    // Find closest point in 'combined' to 'newLatLng'
+    let closestIdx = -1
+    let minDistSq = Infinity
+    
+    combined.forEach((p, idx) => {
+        const dSq = (p.lat - newLatLng.lat) ** 2 + (p.lng - newLatLng.lng) ** 2
+        if (dSq < minDistSq) {
+            minDistSq = dSq
+            closestIdx = idx
+        }
+    })
+
+    // Validate new split index
+    // Must not be 0 (would empty prevSeg) and not last (would empty currSeg)
+    if (closestIdx <= 0 || closestIdx >= combined.length - 1) return
+
+    // Re-split
+    const newPrevSeg = combined.slice(0, closestIdx + 1)
+    const newCurrSeg = combined.slice(closestIdx)
+
+    segments.value.splice(segmentIndex - 1, 2, newPrevSeg, newCurrSeg)
+}
+
+
+
+onMounted(() => {
+    fetchRoutes()
+})
+
+// Save
+const saveSegmentation = async () => {
+    if (!currentRoute.value || !selectedRouteId.value) return
+
+    saving.value = true
+    try {
+        // Construct FeatureCollection
+        const features = segments.value.map((segPoints, idx) => {
+             return {
+                 type: 'Feature',
+                 properties: {
+                     segmentName: getSegmentName(idx),
+                     segmentIndex: idx,
+                     ...currentRoute.value.properties 
+                 },
+                 geometry: {
+                     type: 'LineString',
+                     coordinates: segPoints.map(p => [p.lng, p.lat])
+                 }
+             }
+        })
+
+        const geoJson = {
+            type: 'FeatureCollection',
+            properties: {
+                ...currentRoute.value.properties,
+                updatedAt: new Date().toISOString()
+            },
+            features: features
+        }
+
+        const { error } = await useFetch(`/api/routes/${selectedRouteId.value}`, {
+            method: 'PUT',
+            body: geoJson
+        })
+
+        if (!error.value) {
+            alert('Route segments saved successfully!')
+            await fetchRoutes() // Refresh list
+        } else {
+             alert('Failed to save route.')
+        }
+
+    } catch (e) {
+        console.error(e)
+        alert('Error saving route')
+    } finally {
+        saving.value = false
+    }
+}
+
+</script>

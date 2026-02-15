@@ -37,6 +37,13 @@
       <!-- Header -->
       <div class="px-6 py-3 border-b border-slate-700 flex justify-between items-center bg-slate-800">
         <h2 class="text-xl font-bold text-white tracking-tight">R-Forecasts</h2>
+        
+        <NuxtLink to="/segmentation" class="flex items-center gap-2 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded text-xs font-semibold uppercase tracking-wider text-white hover:text-white transition-colors">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+           </svg>
+           Segmentation
+        </NuxtLink>
       </div>
 
       <div class="p-6 flex-1 overflow-y-auto custom-scrollbar">
@@ -263,11 +270,21 @@ const loadRoute = (route) => {
         arrivalZone.value = route.properties.timezone
     }
     
-    if (route.geometry && route.geometry.coordinates) {
+    points.value = []
+    
+    if (route.type === 'FeatureCollection') {
+        // Flatten all features' coordinates
+        route.features.forEach(feature => {
+            if (feature.geometry && feature.geometry.coordinates) {
+                 const segmentPoints = feature.geometry.coordinates.map(c => ({ lat: c[1], lng: c[0] }))
+                 points.value.push(...segmentPoints)
+            }
+        })
+    } else if (route.geometry && route.geometry.coordinates) {
+        // Single Feature
         points.value = route.geometry.coordinates.map(c => ({ lat: c[1], lng: c[0] }))
-    } else {
-        points.value = []
     }
+    
     editable.value = false
 }
 

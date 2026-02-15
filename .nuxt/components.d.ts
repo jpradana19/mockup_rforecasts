@@ -16,6 +16,7 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 
 export const RouteMapClient copy: typeof import("../components/RouteMap.client copy.vue")['default']
 export const RouteMap: typeof import("../components/RouteMap.client.vue")['default']
+export const SegmentationMap: typeof import("../components/SegmentationMap.client.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
 export const NuxtErrorBoundary: typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -41,6 +42,7 @@ export const Body: typeof import("../node_modules/nuxt/dist/head/runtime/compone
 export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components/nuxt-island")['default']
 export const LazyRouteMapClient copy: LazyComponent<typeof import("../components/RouteMap.client copy.vue")['default']>
 export const LazyRouteMap: LazyComponent<typeof import("../components/RouteMap.client.vue")['default']>
+export const LazySegmentationMap: LazyComponent<typeof import("../components/SegmentationMap.client.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>
