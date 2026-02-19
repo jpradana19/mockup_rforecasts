@@ -8,7 +8,7 @@
     "arrivalZone": "Asia/Makassar",
     "speedKnots": "12.5",
     "id": "1771050037736",
-    "updatedAt": "2026-02-16T22:10:17.014Z"
+    "updatedAt": "2026-02-18T05:18:03.824Z"
   },
   "features": [
     {
@@ -23,7 +23,7 @@
         "arrivalZone": "Asia/Makassar",
         "speedKnots": "12.5",
         "id": "1771050037736",
-        "updatedAt": "2026-02-16T22:08:46.154Z"
+        "updatedAt": "2026-02-16T22:10:17.014Z"
       },
       "geometry": {
         "type": "LineString",
@@ -59,7 +59,7 @@
         "arrivalZone": "Asia/Makassar",
         "speedKnots": "12.5",
         "id": "1771050037736",
-        "updatedAt": "2026-02-16T22:08:46.154Z"
+        "updatedAt": "2026-02-16T22:10:17.014Z"
       },
       "geometry": {
         "type": "LineString",
@@ -83,10 +83,6 @@
           [
             109.9402022189696,
             -6.107783894473565
-          ],
-          [
-            109.9402022189696,
-            -6.107783894473565
           ]
         ]
       }
@@ -103,11 +99,15 @@
         "arrivalZone": "Asia/Makassar",
         "speedKnots": "12.5",
         "id": "1771050037736",
-        "updatedAt": "2026-02-16T22:08:46.154Z"
+        "updatedAt": "2026-02-16T22:10:17.014Z"
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
+          [
+            109.9402022189696,
+            -6.107783894473565
+          ],
           [
             109.9402022189696,
             -6.107783894473565
@@ -151,7 +151,7 @@
         "arrivalZone": "Asia/Makassar",
         "speedKnots": "12.5",
         "id": "1771050037736",
-        "updatedAt": "2026-02-16T22:08:46.154Z"
+        "updatedAt": "2026-02-16T22:10:17.014Z"
       },
       "geometry": {
         "type": "LineString",
@@ -191,7 +191,7 @@
         "arrivalZone": "Asia/Makassar",
         "speedKnots": "12.5",
         "id": "1771050037736",
-        "updatedAt": "2026-02-16T22:08:46.154Z"
+        "updatedAt": "2026-02-16T22:10:17.014Z"
       },
       "geometry": {
         "type": "LineString",
@@ -231,7 +231,7 @@
         "arrivalZone": "Asia/Makassar",
         "speedKnots": "12.5",
         "id": "1771050037736",
-        "updatedAt": "2026-02-16T22:08:46.154Z"
+        "updatedAt": "2026-02-16T22:10:17.014Z"
       },
       "geometry": {
         "type": "LineString",
@@ -271,7 +271,7 @@
         "arrivalZone": "Asia/Makassar",
         "speedKnots": "12.5",
         "id": "1771050037736",
-        "updatedAt": "2026-02-16T22:08:46.154Z"
+        "updatedAt": "2026-02-16T22:10:17.014Z"
       },
       "geometry": {
         "type": "LineString",
@@ -323,7 +323,7 @@
         "arrivalZone": "Asia/Makassar",
         "speedKnots": "12.5",
         "id": "1771050037736",
-        "updatedAt": "2026-02-16T22:08:46.154Z"
+        "updatedAt": "2026-02-16T22:10:17.014Z"
       },
       "geometry": {
         "type": "LineString",
@@ -367,7 +367,7 @@
         "arrivalZone": "Asia/Makassar",
         "speedKnots": "12.5",
         "id": "1771050037736",
-        "updatedAt": "2026-02-16T22:08:46.154Z"
+        "updatedAt": "2026-02-16T22:10:17.014Z"
       },
       "geometry": {
         "type": "LineString",
