@@ -2,7 +2,7 @@
   <div class="flex flex-col h-screen w-full bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-slate-100 overflow-hidden font-sans">
 
     <!-- Header Bar -->
-    <header class="shrink-0 h-11 px-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shadow-sm dark:shadow-none">
+    <header class="shrink-0 h-11 px-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shadow-md dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] z-10">
       <div class="flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-slate-400 mr-3">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -31,13 +31,13 @@
     <div class="flex-1 flex min-h-0">
 
       <!-- LEFT PANEL -->
-      <aside class="w-[340px] shrink-0 flex flex-col bg-gray-50 dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700">
+      <aside class="w-[340px] shrink-0 flex flex-col bg-gray-100 dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 panel-raised">
 
         <!-- Scrollable: Identification + Segments -->
         <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar min-h-0">
 
           <!-- Identification Card -->
-          <div class="border border-gray-300 dark:border-slate-600 rounded-lg p-4 space-y-3 bg-white dark:bg-slate-900">
+          <div class="border border-gray-200 dark:border-slate-600 rounded-xl p-4 space-y-3 bg-white dark:bg-slate-800/90 card-elevated-md">
 
             <!-- Ship Name -->
             <div>
@@ -46,7 +46,7 @@
                 v-model="shipName"
                 type="text"
                 placeholder="Nama Kapal..."
-                class="w-full h-9 px-3 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:border-blue-500 outline-none"
+                class="w-full h-9 px-3 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:border-blue-500 outline-none input-inset"
               />
             </div>
 
@@ -57,11 +57,11 @@
                 <input
                   v-model="departureTime"
                   type="datetime-local"
-                  class="flex-1 h-9 px-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded text-xs text-gray-900 dark:text-white focus:border-blue-500 outline-none min-w-0"
+                  class="flex-1 h-9 px-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-xs text-gray-900 dark:text-white focus:border-blue-500 outline-none min-w-0 input-inset"
                 />
                 <select
                   v-model="departureZone"
-                  class="w-[72px] h-9 px-1 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded text-xs text-gray-900 dark:text-white focus:border-blue-500 outline-none"
+                  class="w-[72px] h-9 px-1 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-xs text-gray-900 dark:text-white focus:border-blue-500 outline-none input-inset"
                 >
                   <option v-for="tz in timezones" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
                 </select>
@@ -75,11 +75,11 @@
                 <input
                   v-model="arrivalTime"
                   type="datetime-local"
-                  class="flex-1 h-9 px-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded text-xs text-gray-900 dark:text-white focus:border-blue-500 outline-none min-w-0"
+                  class="flex-1 h-9 px-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-xs text-gray-900 dark:text-white focus:border-blue-500 outline-none min-w-0 input-inset"
                 />
                 <select
                   v-model="arrivalZone"
-                  class="w-[72px] h-9 px-1 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded text-xs text-gray-900 dark:text-white focus:border-blue-500 outline-none"
+                  class="w-[72px] h-9 px-1 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-xs text-gray-900 dark:text-white focus:border-blue-500 outline-none input-inset"
                 >
                   <option v-for="tz in timezones" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
                 </select>
@@ -104,7 +104,7 @@
           <div class="space-y-2">
             <span class="text-xs text-gray-500 dark:text-slate-400 font-semibold">Segmen</span>
 
-            <div v-if="segments.length === 0" class="text-xs text-gray-400 dark:text-slate-500 text-center py-4 border border-gray-200 dark:border-slate-700 rounded-lg">
+            <div v-if="segments.length === 0" class="text-xs text-gray-400 dark:text-slate-500 text-center py-4 border border-gray-200 dark:border-slate-600 rounded-xl card-inset">
               Klik pada peta untuk menambahkan titik.
             </div>
 
@@ -112,26 +112,44 @@
             <div
               v-for="(stat, idx) in segmentStats"
               :key="idx"
-              class="border border-gray-300 dark:border-slate-600 rounded-lg p-3 bg-white dark:bg-slate-900 border-l-4"
+              class="border border-gray-200 dark:border-slate-600 rounded-xl p-3 bg-white dark:bg-slate-800/90 border-l-4 card-elevated"
               :style="{ borderLeftColor: getSegmentColor(idx) }"
             >
-              <div class="grid grid-cols-[auto_1fr_1fr_1fr] gap-x-4 gap-y-1 text-xs items-baseline">
-                <span class="text-gray-400 dark:text-slate-500 font-semibold">No</span>
-                <span class="text-gray-400 dark:text-slate-500 font-semibold">Jarak</span>
-                <span class="text-gray-400 dark:text-slate-500 font-semibold">Waktu Tempuh</span>
-                <span class="text-gray-400 dark:text-slate-500 font-semibold">Interval</span>
-                <span class="font-bold text-sm">{{ idx + 1 }}</span>
-                <span>{{ stat.distance.toFixed(0) }} km</span>
-                <span>{{ formatDuration(stat.duration) }}</span>
-                <select
+              <div class="flex items-start justify-between gap-2">
+                <div class="grid grid-cols-[auto_1fr_1fr_1fr] gap-x-4 gap-y-1 text-xs items-baseline flex-1 min-w-0">
+                  <span class="text-gray-400 dark:text-slate-500 font-semibold">No</span>
+                  <span class="text-gray-400 dark:text-slate-500 font-semibold">Jarak</span>
+                  <span class="text-gray-400 dark:text-slate-500 font-semibold">Waktu Tempuh</span>
+                  <span class="text-gray-400 dark:text-slate-500 font-semibold">Interval</span>
+                  <span class="font-bold text-sm">{{ idx + 1 }}</span>
+                  <span>{{ stat.distance.toFixed(0) }} km</span>
+                  <span>{{ formatDuration(stat.duration) }}</span>
+                  <select
                   :value="segmentIntervals[idx] || '6H'"
                   @change="updateInterval(idx, $event.target.value)"
-                  class="h-6 px-1 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded text-xs focus:border-blue-500 outline-none"
+                  class="h-6 px-1 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-xs focus:border-blue-500 outline-none input-inset"
                 >
-                  <option value="1H">1H</option>
-                  <option value="3H">3H</option>
-                  <option value="6H">6H</option>
-                </select>
+                    <option value="1H">1H</option>
+                    <option value="3H">3H</option>
+                    <option value="6H">6H</option>
+                  </select>
+                </div>
+                <button
+                  @click="deleteSegment(idx)"
+                  :disabled="segments.length <= 1"
+                  class="shrink-0 p-1.5 rounded-lg text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="Hapus segmen"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  </svg>
+                </button>
+              </div>
+              <div class="mt-2 pt-2 border-t border-gray-200 dark:border-slate-700 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                <span class="text-gray-400 dark:text-slate-500 font-semibold">Tanggal Mulai</span>
+                <span class="text-gray-400 dark:text-slate-500 font-semibold">Tanggal Selesai</span>
+                <span class="font-mono text-[11px] text-gray-700 dark:text-slate-300">{{ formatSegmentDateTime(stat.startDate, departureZone) }}</span>
+                <span class="font-mono text-[11px] text-gray-700 dark:text-slate-300">{{ formatSegmentDateTime(stat.endDate, departureZone) }}</span>
               </div>
             </div>
           </div>
@@ -139,11 +157,11 @@
         </div>
 
         <!-- Pinned Bottom: Route controls + Proses -->
-        <div class="shrink-0 p-3 border-t border-gray-200 dark:border-slate-700 space-y-2 bg-white dark:bg-slate-800/50">
+        <div class="shrink-0 p-3 border-t border-gray-200 dark:border-slate-700 space-y-2 bg-white dark:bg-slate-800/80 card-elevated-md shadow-[0_-2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_-2px_12px_rgba(0,0,0,0.25)]">
           <select
             v-model="selectedRouteId"
             @change="onRouteSelect"
-            class="w-full h-9 px-3 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded text-xs focus:border-blue-500 outline-none"
+            class="w-full h-9 px-3 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-xs focus:border-blue-500 outline-none input-inset"
           >
             <option value="">Rute Baru</option>
             <option v-for="r in savedRoutes" :key="r.properties.id" :value="r.properties.id">
@@ -205,14 +223,21 @@
           >
             Proses
           </button>
+
+          <button
+            @click="showGeoJsonModal = true"
+            :disabled="allPoints.length < 2"
+            class="w-full h-8 text-xs font-semibold text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-700 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-30"
+          >
+            Preview GeoJSON
+          </button>
         </div>
       </aside>
 
       <!-- RIGHT PANEL -->
-      <div class="flex-1 flex flex-col min-w-0">
-
+      <div class="flex-1 flex flex-col min-w-0 p-3 gap-3 bg-gray-100 dark:bg-slate-900">
         <!-- Map Container -->
-        <div class="flex-[3] relative min-h-0">
+        <div class="flex-[3] relative min-h-[180px] rounded-xl overflow-hidden border border-gray-200 dark:border-slate-600 shadow-lg dark:shadow-[0_4px_12px_rgba(0,0,0,0.25)]">
           <ClientOnly>
             <RouteMap
               :segments="segments"
@@ -220,6 +245,7 @@
               :route-id="currentRouteId || ''"
               :can-undo="canUndo"
               :can-redo="canRedo"
+              :selected-point="selectedPoint"
               @add-point="handleAddPoint"
               @insert-point="handleInsertPoint"
               @update-point="handleUpdatePoint"
@@ -236,20 +262,20 @@
             v-if="allPoints.length === 0"
             class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
           >
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur px-4 py-2 rounded-lg text-xs text-gray-500 dark:text-slate-400 shadow">
+            <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur px-4 py-3 rounded-xl text-xs text-gray-500 dark:text-slate-400 shadow-lg border border-gray-200/50 dark:border-slate-600/50">
               Klik pada peta untuk memulai menggambar rute
             </div>
           </div>
         </div>
 
         <!-- List Points Container -->
-        <div class="flex-[2] bg-gray-50 dark:bg-slate-900 flex flex-col min-h-0 p-3">
-          <div class="flex-1 border border-gray-300 dark:border-slate-600 rounded-lg flex flex-col min-h-0 overflow-hidden bg-white dark:bg-slate-900">
+        <div class="flex-[2] flex flex-col min-h-[100px]">
+          <div class="flex-1 border border-gray-200 dark:border-slate-600 rounded-xl flex flex-col min-h-0 overflow-hidden bg-white dark:bg-slate-800/90 card-elevated-md h-full">
             <div class="px-4 pt-3 pb-2 shrink-0 border-b border-gray-200 dark:border-slate-700">
               <span class="text-sm font-bold">List Point</span>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-3 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto p-3 custom-scrollbar min-h-0">
               <div v-if="allPoints.length === 0" class="text-xs text-gray-400 dark:text-slate-500 text-center py-6">
                 Belum ada titik.
               </div>
@@ -258,13 +284,24 @@
                 <div
                   v-for="(point, idx) in pointsWithSegmentInfo"
                   :key="idx"
-                  class="p-2 rounded border border-l-4 text-center"
+                  class="p-2 rounded-lg border border-l-4 text-center card-elevated relative cursor-pointer transition-all"
+                  :class="{ 'ring-2 ring-blue-500 ring-offset-1': selectedPoint && selectedPoint.segmentIndex === point.mapSegmentIndex && selectedPoint.pointIndex === point.mapPointIndex }"
                   :style="{
                     borderLeftColor: getSegmentColor(point.segmentIndex),
                     backgroundColor: `${getSegmentColor(point.segmentIndex)}15`,
                     borderColor: `${getSegmentColor(point.segmentIndex)}40`
                   }"
+                  @click="toggleSelectedPoint(point)"
                 >
+                  <button
+                    @click.stop="handleDeletePoint({ segmentIndex: point.segmentIndex, pointIndex: point.pointIndex })"
+                    class="absolute top-1 right-1 p-0.5 rounded text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                    title="Hapus titik"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                   <div class="text-xs font-bold mb-0.5" :style="{ color: getSegmentColor(point.segmentIndex) }">{{ idx + 1 }}</div>
                   <div class="text-[10px] font-mono text-gray-700 dark:text-slate-300 leading-tight">{{ formatLng(point.lng) }}</div>
                   <div class="text-[10px] font-mono text-gray-500 dark:text-slate-400 leading-tight">{{ formatLat(point.lat) }}</div>
@@ -275,12 +312,43 @@
         </div>
       </div>
     </div>
+
+    <!-- Preview GeoJSON Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showGeoJsonModal"
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50"
+        @click.self="showGeoJsonModal = false"
+      >
+        <div class="bg-white dark:bg-slate-800 rounded-2xl card-elevated-lg shadow-2xl border border-gray-200 dark:border-slate-600 flex flex-col w-full max-w-2xl max-h-[80vh] overflow-hidden">
+          <div class="px-4 py-3 shrink-0 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+            <span class="text-sm font-bold">Preview GeoJSON</span>
+            <button
+              @click="showGeoJsonModal = false"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 transition-colors"
+              title="Tutup"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0">
+            <pre v-if="previewGeoJson" class="text-xs font-mono text-gray-700 dark:text-slate-300 whitespace-pre-wrap break-all">{{ previewGeoJson }}</pre>
+            <div v-else class="text-xs text-gray-400 dark:text-slate-500 text-center py-8">
+              Belum ada data.
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { calculateDistance, formatSpeed, calculateSpeedVal } from '~/utils/routeMath'
-import { fromZonedTime } from 'date-fns-tz'
+import { format } from 'date-fns'
+import { fromZonedTime, toZonedTime } from 'date-fns-tz'
 
 const { logout } = useAuth()
 const { isDark, toggle: toggleTheme } = useTheme()
@@ -298,6 +366,8 @@ const arrivalZone = ref('UTC')
 
 const segments = ref([])
 const segmentIntervals = ref([])
+const showGeoJsonModal = ref(false)
+const selectedPoint = ref(null)
 
 const undoStack = ref([])
 const redoStack = ref([])
@@ -370,7 +440,10 @@ const pointsWithSegmentInfo = computed(() => {
   segments.value.forEach((seg, segIdx) => {
     seg.forEach((p, pIdx) => {
       if (segIdx > 0 && pIdx === 0) return
-      result.push({ ...p, segmentIndex: segIdx })
+      const isBoundary = pIdx === seg.length - 1 && segIdx < segments.value.length - 1
+      const mapSegmentIndex = isBoundary ? segIdx + 1 : segIdx
+      const mapPointIndex = isBoundary ? 0 : pIdx
+      result.push({ ...p, segmentIndex: segIdx, pointIndex: pIdx, mapSegmentIndex, mapPointIndex })
     })
   })
   return result
@@ -404,6 +477,13 @@ const formattedSpeed = computed(() => {
 const formattedDuration = computed(() => formatDuration(totalDurationMs.value))
 
 const segmentStats = computed(() => {
+  let cumulativeMs = null
+  try {
+    if (departureTime.value && departureZone.value) {
+      cumulativeMs = fromZonedTime(departureTime.value, departureZone.value).getTime()
+    }
+  } catch { cumulativeMs = null }
+
   return segments.value.map((seg, idx) => {
     let dist = 0
     for (let i = 0; i < seg.length - 1; i++) {
@@ -411,9 +491,27 @@ const segmentStats = computed(() => {
     }
     const td = totalDistance.value
     const duration = td > 0 ? (dist / td) * totalDurationMs.value : 0
-    return { index: idx, distance: dist, duration, pointCount: seg.length }
+    const startMs = cumulativeMs
+    const endMs = cumulativeMs != null ? cumulativeMs + duration : null
+    if (cumulativeMs != null) cumulativeMs = endMs
+    return {
+      index: idx,
+      distance: dist,
+      duration,
+      pointCount: seg.length,
+      startDate: startMs != null ? new Date(startMs) : null,
+      endDate: endMs != null ? new Date(endMs) : null
+    }
   })
 })
+
+const formatSegmentDateTime = (date, tz) => {
+  if (!date || !tz) return '-'
+  try {
+    const zoned = toZonedTime(date, tz)
+    return format(zoned, 'dd/MM/yyyy HH:mm')
+  } catch { return '-' }
+}
 
 const formatDuration = (ms) => {
   if (!ms || ms <= 0) return '-'
@@ -432,8 +530,69 @@ const formatDuration = (ms) => {
 const formatLng = (lng) => `${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`
 const formatLat = (lat) => `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}`
 
+const previewGeoJson = computed(() => {
+  if (allPoints.value.length < 2) return null
+  const baseProps = {
+    name: shipName.value || '(Unnamed)',
+    departureTime: departureTime.value,
+    arrivalTime: arrivalTime.value,
+    departureZone: departureZone.value,
+    arrivalZone: arrivalZone.value,
+    speedKnots: formattedSpeed.value,
+  }
+  let geo
+  if (segments.value.length <= 1) {
+    geo = {
+      type: 'Feature',
+      properties: { ...baseProps, interval: segmentIntervals.value[0] || '6H' },
+      geometry: { type: 'LineString', coordinates: (segments.value[0] || []).map(p => [p.lng, p.lat]) }
+    }
+  } else {
+    geo = {
+      type: 'FeatureCollection',
+      properties: baseProps,
+      features: segments.value.map((seg, idx) => ({
+        type: 'Feature',
+        properties: {
+          segmentName: String.fromCharCode(65 + idx),
+          segmentIndex: idx,
+          interval: segmentIntervals.value[idx] || '6H'
+        },
+        geometry: { type: 'LineString', coordinates: seg.map(p => [p.lng, p.lat]) }
+      }))
+    }
+  }
+  return JSON.stringify(geo, null, 2)
+})
+
+const toggleSelectedPoint = (point) => {
+  const key = `${point.mapSegmentIndex}-${point.mapPointIndex}`
+  const current = selectedPoint.value
+  const currentKey = current ? `${current.segmentIndex}-${current.pointIndex}` : null
+  selectedPoint.value = key === currentKey ? null : { segmentIndex: point.mapSegmentIndex, pointIndex: point.mapPointIndex }
+}
+
 const updateInterval = (idx, value) => {
   segmentIntervals.value[idx] = value
+}
+
+const deleteSegment = (idx) => {
+  if (segments.value.length <= 1) return
+  pushUndo()
+  if (idx === 0) {
+    segments.value.shift()
+    segmentIntervals.value.shift()
+  } else if (idx === segments.value.length - 1) {
+    segments.value.pop()
+    segmentIntervals.value.pop()
+  } else {
+    const prev = segments.value[idx - 1]
+    const next = segments.value[idx + 1]
+    const merged = [...prev, ...next]
+    const interval = segmentIntervals.value[idx - 1]
+    segments.value.splice(idx - 1, 3, merged)
+    segmentIntervals.value.splice(idx - 1, 3, interval)
+  }
 }
 
 const fetchRoutes = async () => {
@@ -468,6 +627,9 @@ const handleUpdatePoint = ({ segmentIndex, pointIndex, lat, lng }) => {
 const handleDeletePoint = ({ segmentIndex, pointIndex }) => {
   const seg = segments.value[segmentIndex]
   if (!seg) return
+  if (selectedPoint.value?.segmentIndex === segmentIndex && selectedPoint.value?.pointIndex === pointIndex) {
+    selectedPoint.value = null
+  }
   pushUndo()
   seg.splice(pointIndex, 1)
   if (seg.length === 0) {
@@ -514,6 +676,7 @@ const handleInsertPoint = ({ segmentIndex, afterPointIndex, lat, lng }) => {
 const resetRoute = () => {
   segments.value = []
   segmentIntervals.value = []
+  selectedPoint.value = null
   undoStack.value = []
   redoStack.value = []
   shipName.value = ''
@@ -552,6 +715,7 @@ const onRouteSelect = () => {
 const loadRouteData = (route) => {
   undoStack.value = []
   redoStack.value = []
+  selectedPoint.value = null
   currentRouteId.value = route.properties.id
   selectedRouteId.value = route.properties.id
   shipName.value = route.properties.name || ''

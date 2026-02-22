@@ -3,7 +3,7 @@
     <div ref="mapContainer" class="w-full h-full bg-gray-200 dark:bg-slate-800" style="min-height: 300px;"></div>
 
     <!-- Toolbox -->
-    <div class="absolute top-3 left-3 z-[1000] flex flex-col gap-1 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-lg shadow-lg p-1.5 border border-gray-200 dark:border-slate-600">
+    <div class="absolute top-3 left-3 z-[1000] flex flex-col gap-1 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-xl shadow-xl p-1.5 border border-gray-200 dark:border-slate-600">
       <!-- Line Mode -->
       <button
         @click="setMode('line')"
@@ -76,7 +76,7 @@
     <!-- Measure Info Panel -->
     <div
       v-if="activeMode === 'measure' && measurePoints.length >= 2"
-      class="absolute bottom-3 left-3 z-[1000] bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 border border-gray-200 dark:border-slate-600"
+      class="absolute bottom-3 left-3 z-[1000] bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-xl shadow-xl px-3 py-2 border border-gray-200 dark:border-slate-600"
     >
       <div class="flex items-center gap-2 text-xs">
         <span class="text-gray-500 dark:text-slate-400">Jarak:</span>
@@ -106,7 +106,8 @@ const props = defineProps({
   editable: { type: Boolean, default: true },
   routeId: { type: String, default: '' },
   canUndo: { type: Boolean, default: false },
-  canRedo: { type: Boolean, default: false }
+  canRedo: { type: Boolean, default: false },
+  selectedPoint: { type: Object, default: null }
 })
 
 const emit = defineEmits([
@@ -118,6 +119,7 @@ const emit = defineEmits([
 const mapContainer = ref(null)
 let map = null
 let layers = []
+let pointLayers = new Map()
 
 const activeMode = ref('line')
 const measurePoints = ref([])
@@ -323,6 +325,23 @@ watch(() => activeMode.value, (newMode, oldMode) => {
 watch(() => props.segments, () => renderMap(), { deep: true })
 watch(() => props.routeId, () => { setTimeout(() => fitBounds(), 150) })
 
+const applySelectedPointVisibility = () => {
+  if (!map) return
+  const sp = props.selectedPoint
+  pointLayers.forEach((entry, key) => {
+    const matches = !sp || `${sp.segmentIndex}-${sp.pointIndex}` === key
+    try {
+      if (matches) {
+        if (!map.hasLayer(entry.layer)) map.addLayer(entry.layer)
+      } else {
+        if (map.hasLayer(entry.layer)) map.removeLayer(entry.layer)
+      }
+    } catch {}
+  })
+}
+
+watch(() => props.selectedPoint, applySelectedPointVisibility, { deep: true })
+
 // --- Map rendering ---
 
 const fitBounds = () => {
@@ -332,6 +351,7 @@ const fitBounds = () => {
 }
 
 const clearLayers = () => {
+  pointLayers.clear()
   layers.forEach(l => { try { map.removeLayer(l) } catch {} })
   layers = []
 }
@@ -388,6 +408,7 @@ const renderMap = () => {
           draggable: isSelect,
           icon: createDotIcon(color, 16, 3)
         }).addTo(map)
+        pointLayers.set(`${segIdx}-${pIdx}`, { layer: m })
         m.bindTooltip(`Seg ${getSegName(segIdx)}`, { permanent: true, direction: 'right', className: 'seg-tooltip' })
         if (isSelect) {
           m.on('dragend', (e) => emit('shift-boundary', { segmentIndex: segIdx, newLatLng: e.target.getLatLng() }))
@@ -401,6 +422,7 @@ const renderMap = () => {
           draggable: isSelect,
           icon: createDotIcon(isStart ? '#22c55e' : '#ef4444', 14, 2)
         }).addTo(map)
+        pointLayers.set(`${segIdx}-${pIdx}`, { layer: m })
         m.bindTooltip(isStart ? 'Start' : 'End', { permanent: true, direction: 'right', className: 'seg-tooltip' })
         if (isSelect) {
           m.on('dragend', (e) => {
@@ -413,38 +435,27 @@ const renderMap = () => {
         }
         layers.push(m)
       } else {
-        // Interior points
+        // Interior points - always use marker so they can be dragged in both modes
+        const m = L.marker([p.lat, p.lng], {
+          draggable: props.editable,
+          icon: createDotIcon(color, isLine ? 8 : 10, 2)
+        }).addTo(map)
+        pointLayers.set(`${segIdx}-${pIdx}`, { layer: m })
+        m.on('dragend', (e) => {
+          const ll = e.target.getLatLng()
+          emit('update-point', { segmentIndex: segIdx, pointIndex: pIdx, lat: ll.lat, lng: ll.lng })
+        })
         if (isSelect) {
-          const m = L.marker([p.lat, p.lng], {
-            draggable: true,
-            icon: createDotIcon(color, 10, 2)
-          }).addTo(map)
-          m.on('dragend', (e) => {
-            const ll = e.target.getLatLng()
-            emit('update-point', { segmentIndex: segIdx, pointIndex: pIdx, lat: ll.lat, lng: ll.lng })
-          })
           m.on('click', (e) => { L.DomEvent.stopPropagation(e); emit('split', { segmentIndex: segIdx, pointIndex: pIdx }) })
-          m.on('contextmenu', (e) => { L.DomEvent.stopPropagation(e); emit('delete-point', { segmentIndex: segIdx, pointIndex: pIdx }) })
-          layers.push(m)
-        } else {
-          const c = L.circleMarker([p.lat, p.lng], {
-            radius: isLine ? 4 : 3,
-            color: '#fff',
-            fillColor: color,
-            fillOpacity: isLine ? 0.9 : 0.7,
-            weight: 1.5,
-            interactive: isLine
-          }).addTo(map)
-          if (isLine) {
-            c.on('contextmenu', (e) => { L.DomEvent.stopPropagation(e); emit('delete-point', { segmentIndex: segIdx, pointIndex: pIdx }) })
-            c.on('mouseover', () => { c.setRadius(7); c.setStyle({ color: '#60a5fa', weight: 2 }) })
-            c.on('mouseout', () => { c.setRadius(4); c.setStyle({ color: '#fff', weight: 1.5 }) })
-          }
-          layers.push(c)
         }
+        if (mode !== 'measure') {
+          m.on('contextmenu', (e) => { L.DomEvent.stopPropagation(e); emit('delete-point', { segmentIndex: segIdx, pointIndex: pIdx }) })
+        }
+        layers.push(m)
       }
     })
   })
+  nextTick(() => applySelectedPointVisibility())
 }
 </script>
 
