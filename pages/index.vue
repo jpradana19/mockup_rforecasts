@@ -1,29 +1,29 @@
 <template>
-  <div class="h-screen w-full flex items-center justify-center bg-slate-900">
-    <div class="card w-full max-w-md bg-slate-800 border-slate-700">
+  <div class="h-screen w-full flex items-center justify-center bg-gray-100 dark:bg-slate-900">
+    <div class="card w-full max-w-md">
       <div class="mb-8 text-center">
-        <h1 class="text-3xl font-bold text-white mb-2">R-Forecasts</h1>
-        <p class="text-slate-400">Ship Route Management System</p>
+        <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">R-Forecasts</h1>
+        <p class="text-gray-500 dark:text-slate-400">Ship Route Management System</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
         <div>
           <label class="label">Username</label>
-          <input 
-            v-model="username" 
-            type="text" 
-            class="input" 
+          <input
+            v-model="username"
+            type="text"
+            class="input"
             placeholder="Enter username"
             required
           />
         </div>
-        
+
         <div>
           <label class="label">Password</label>
-          <input 
-            v-model="password" 
-            type="password" 
-            class="input" 
+          <input
+            v-model="password"
+            type="password"
+            class="input"
             placeholder="Enter password"
             required
           />
@@ -33,8 +33,8 @@
           {{ error }}
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           class="btn btn-primary w-full py-3 mt-2"
           :disabled="loading"
         >
@@ -46,6 +46,8 @@
 </template>
 
 <script setup>
+const { isDark } = useTheme()
+
 const username = ref('')
 const password = ref('')
 const error = ref('')
@@ -55,7 +57,7 @@ const { login } = useAuth()
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-  
+
   try {
     const success = await login(username.value, password.value)
     if (success) {

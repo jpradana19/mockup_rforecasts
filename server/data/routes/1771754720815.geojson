@@ -1,0 +1,185 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "name": "tezzzz",
+    "departureTime": "2026-02-22T17:00",
+    "arrivalTime": "2026-03-13T17:00",
+    "departureZone": "UTC",
+    "arrivalZone": "UTC",
+    "speedKnots": "5.5",
+    "id": "1771754720815",
+    "createdAt": "2026-02-22T10:05:20.815Z"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "segmentName": "A",
+        "segmentIndex": 0,
+        "interval": "6H"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            106.78710937500001,
+            1.0171136979746171
+          ],
+          [
+            107.90771484375001,
+            -0.8117759386873152
+          ],
+          [
+            109.599609375,
+            -3.5914616396453534
+          ],
+          [
+            112.76367187500001,
+            -4.248628748385863
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "segmentName": "B",
+        "segmentIndex": 1,
+        "interval": "6H"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            112.76367187500001,
+            -4.248628748385863
+          ],
+          [
+            117.02636718750001,
+            -4.467564363359328
+          ],
+          [
+            121.8603515625,
+            -5.211437697841535
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "segmentName": "C",
+        "segmentIndex": 2,
+        "interval": "6H"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            121.8603515625,
+            -5.211437697841535
+          ],
+          [
+            122.16796875000001,
+            -6.303735505736845
+          ],
+          [
+            121.99218750000001,
+            -7.9595027215296215
+          ],
+          [
+            118.82812500000001,
+            -10.516607749741112
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "segmentName": "D",
+        "segmentIndex": 3,
+        "interval": "6H"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            118.82812500000001,
+            -10.516607749741112
+          ],
+          [
+            116.52099609375001,
+            -10.098700826406596
+          ],
+          [
+            114.74121093750001,
+            -10.026119496803567
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "segmentName": "E",
+        "segmentIndex": 4,
+        "interval": "6H"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            114.74121093750001,
+            -10.026119496803567
+          ],
+          [
+            112.76367187500001,
+            -9.917992805741996
+          ],
+          [
+            110.30273437500001,
+            -9.853099635626704
+          ],
+          [
+            108.96240234375,
+            -9.809830423912333
+          ],
+          [
+            107.75390625,
+            -9.65190229810362
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "segmentName": "F",
+        "segmentIndex": 5,
+        "interval": "6H"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            107.75390625,
+            -9.65190229810362
+          ],
+          [
+            106.36962890625001,
+            -9.246825190397672
+          ],
+          [
+            103.4912109375,
+            -8.35073236883274
+          ],
+          [
+            102.56835937500001,
+            -6.740033775879932
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,148 +1,105 @@
-:root {
-    --color-bg: #0f172a;
-    --color-surface: #1e293b;
-    --color-surface-hover: #334155;
-    --color-primary: #0ea5e9;
-    --color-primary-hover: #0284c7;
-    --color-accent: #14b8a6;
-    --color-text: #f8fafc;
-    --color-text-muted: #94a3b8;
-    --color-border: #334155;
-    --color-danger: #ef4444;
-    
-    --font-main: 'Outfit', sans-serif;
-    
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
 body {
-    font-family: var(--font-main);
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    line-height: 1.5;
+    font-family: 'Outfit', sans-serif;
     -webkit-font-smoothing: antialiased;
 }
 
-/* Utilities */
-.container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 1rem;
+/* Component: .input (used on login page) */
+.input {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #0f172a;
+    font-family: 'Outfit', sans-serif;
+    transition: border-color 0.2s;
+}
+.dark .input {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #f8fafc;
+}
+.input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.gap-2 { gap: 0.5rem; }
-.gap-4 { gap: 1rem; }
-.w-full { width: 100%; }
-.h-full { height: 100%; }
-.h-screen { height: 100vh; }
-
-/* Typography */
-h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
-    line-height: 1.25;
+/* Component: .card (used on login page) */
+.card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+.dark .card {
+    background-color: #1e293b;
+    border-color: #334155;
 }
 
-h1 { font-size: 2.25rem; }
-h2 { font-size: 1.875rem; }
-h3 { font-size: 1.5rem; }
+/* Component: .label (used on login page) */
+.label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+.dark .label {
+    color: #94a3b8;
+}
 
-/* Components */
+/* Component: .btn */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0.5rem 1rem;
     font-weight: 500;
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     border: none;
     cursor: pointer;
     transition: all 0.2s;
-    font-family: var(--font-main);
+    font-family: 'Outfit', sans-serif;
     font-size: 0.95rem;
 }
 
 .btn-primary {
-    background-color: var(--color-primary);
+    background-color: #2563eb;
     color: white;
 }
-
 .btn-primary:hover {
-    background-color: var(--color-primary-hover);
+    background-color: #1d4ed8;
     transform: translateY(-1px);
 }
-
-.btn-danger {
-    background-color: var(--color-danger);
-    color: white;
+.btn-primary:disabled {
+    opacity: 0.5;
+    transform: none;
+    cursor: not-allowed;
 }
 
-.btn-ghost {
-    background-color: transparent;
-    color: var(--color-text-muted);
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
 }
-
-.btn-ghost:hover {
-    color: var(--color-text);
-    background-color: var(--color-surface-hover);
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
 }
-
-.input {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
-    font-family: var(--font-main);
-    transition: border-color 0.2s;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 4px;
 }
-
-.input:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
-}
-
-.card {
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-md);
-}
-
-.label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-text-muted);
-    margin-bottom: 0.5rem;
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
 }
 
 /* Animations */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease;
 }
-
 .fade-enter-from,
 .fade-leave-to {
-  opacity: 0;
+    opacity: 0;
 }

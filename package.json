@@ -14,10 +14,13 @@
         "date-fns-tz": "^3.2.0",
         "leaflet": "^1.9.4",
         "nuxt": "^3.10.0",
-        "vue": "^3.4.0",
-        "vue-router": "^4.0.0"
+        "vue": "^3.4.0"
     },
     "devDependencies": {
+        "@nuxtjs/tailwindcss": "^6.14.0",
         "@types/leaflet": "^1.9.8"
+    },
+    "overrides": {
+        "minimatch": ">=10.2.1"
     }
 }

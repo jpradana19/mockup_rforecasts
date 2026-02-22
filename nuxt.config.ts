@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-    ssr: false, // Client-side rendering mostly for map apps
+    ssr: false,
+    modules: ['@nuxtjs/tailwindcss'],
     css: [
         '~/assets/css/main.css',
         'leaflet/dist/leaflet.css'
